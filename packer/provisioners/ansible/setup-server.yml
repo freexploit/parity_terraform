@@ -1,0 +1,55 @@
+---
+- hosts: all
+  become: yes
+  become_method: sudo
+
+  tasks:
+    - name: Upgrade all packages to the latest version
+      apt:
+        name: "*"
+        state: latest
+
+    - name: Install wget 
+      apt:
+        name: wget
+        state: present
+    - name: Download parity client
+      get_url:
+        url: https://releases.parity.io/ethereum/v2.5.13/x86_64-unknown-linux-gnu/parity
+        sha256sum: e133fb316c7829d9291bb73ceb3053409053d03603565a2b4d2a582c9ad4c84b
+        mode: 0655
+        dest: /usr/bin
+
+    - name: Create parity folder config
+      file:
+        path: /etc/parity
+        state: directory
+        mode: 0755
+
+    - name: Deploy parity configuration file
+      template:
+        src: templates/config.toml.j2
+        dest: /etc/parity/config.toml
+
+    - name: Deploy parity reserved peer file
+      template:
+        src: templates/reserved_peers.j2
+        dest: /etc/parity/reserved_peers
+
+    - name: Deploy Configuration file
+      template:
+        src: templates/parity.service.j2
+        dest: /etc/systemd/system/parity.service
+
+    - name: Start Parity Service
+      systemd:
+        daemon_reload: yes
+        name: parity
+        enabled: yes
+        state: started
+
+
+
+
+
+
