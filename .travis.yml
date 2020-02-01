@@ -3,7 +3,7 @@ services:
 - docker
 before_install:
 - docker pull hashicorp/packer:light
-- docker build -t radar/packer .
+- docker build -t radar/packer:latest .
 script:
 - >
   docker run -it -e AWS_DEFAULT_REGION=$AWS_DEFAULT_REGION  -e $AWS_SECRET_ACCESS_KEY -e $AWS_SECRET_ACCESS_KEY -v $(pwd)/packer:/packer radar/packer-builder:latest build parity-instance.json
