@@ -70,7 +70,7 @@ resource "aws_key_pair" "login" {
 
 resource "aws_instance" "parity-client" {
   ami = data.aws_ami.parity.id
-  instance_type = "t2.micro"
+  instance_type = "m5.large"
   vpc_security_group_ids = [ aws_security_group.allow_ssh.id ]
   key_name = aws_key_pair.login.key_name
   root_block_device  {

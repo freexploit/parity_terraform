@@ -11,8 +11,12 @@
 
     - name: Install wget 
       apt:
-        name: wget
+        name: "{{ item }}"
         state: present
+      loop:
+        - wget
+        - sysstat
+
     - name: Download parity client
       get_url:
         url: https://releases.parity.io/ethereum/v2.5.13/x86_64-unknown-linux-gnu/parity
