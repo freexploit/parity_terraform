@@ -2,8 +2,9 @@ FROM  hashicorp/terraform:light
 
 
 RUN addgroup -S appgroup && adduser -S appuser -G appgroup
-USER appuser
+RUN mkdir /terraform; chown -R appuser:appgroup /terraform
 WORKDIR /terraform
+USER appuser
 
 ENTRYPOINT ["/bin/terraform"]
 
