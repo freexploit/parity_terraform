@@ -1,0 +1,9 @@
+FROM  hashicorp/terraform:light 
+
+
+RUN addgroup -S appgroup && adduser -S appuser -G appgroup
+USER appuser
+WORKDIR /terraform
+
+ENTRYPOINT ["/bin/terraform"]
+

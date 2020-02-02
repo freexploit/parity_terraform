@@ -2,20 +2,28 @@ provider "aws" {
   version = "~> 2.0"
   profile = "upway"
   region = "us-west-2"
-
 }
+
+terraform {
+  backend "s3" {
+    bucket = "radar-parity-state"
+    key = "parity/"
+    region = "us-west-2"
+    dynamodb_table = "terraform-state-locking"
+  }
+}
+
+
 
 data "aws_ami" "parity" {
 
-  #executable_users = ["self"]
-  most_recent = true
-  owners = ["self"]
+  owners = ["646698552641"]
 
   filter {
     name = "name"
     values = ["parity-ethereum-*"]
   }
-  
+  most_recent = true
 }
 
 resource "aws_security_group" "allow_ssh" {
@@ -30,7 +38,7 @@ resource "aws_security_group" "allow_ssh" {
     protocol    = "tcp"
     # Please restrict your ingress to only necessary IPs and ports.
     # Opening to 0.0.0.0/0 can lead to security vulnerabilities.
-    cidr_blocks = ["190.113.111.24/32"]
+    cidr_blocks = ["186.15.200.209/32"]
   }
 
   ingress {
@@ -61,6 +69,23 @@ resource "aws_security_group" "allow_ssh" {
   }
 }
 
+resource "aws_security_group" "parity-ports" {
+
+  name        = "Parity RPC services"
+  description = "Allow Parity RPC inbound traffic"
+  vpc_id      = "vpc-b1841bc9"
+
+  ingress {
+    # TLS (change to whatever ports you need)
+    from_port   = 8545
+    to_port     = 8546
+    protocol    = "tcp"
+    # Please restrict your ingress to only necessary IPs and ports.
+    # Opening to 0.0.0.0/0 can lead to security vulnerabilities.
+    cidr_blocks = ["186.15.200.209/32"]
+  }
+}
+
 
 resource "aws_key_pair" "login" {
   key_name = "login"
@@ -71,7 +96,7 @@ resource "aws_key_pair" "login" {
 resource "aws_instance" "parity-client" {
   ami = data.aws_ami.parity.id
   instance_type = "m5.large"
-  vpc_security_group_ids = [ aws_security_group.allow_ssh.id ]
+  vpc_security_group_ids = [ aws_security_group.allow_ssh.id, aws_security_group.parity-ports.id ]
   key_name = aws_key_pair.login.key_name
   root_block_device  {
     volume_size = 600
@@ -80,7 +105,8 @@ resource "aws_instance" "parity-client" {
   tags = {
     Name = "parity-client"
   }
+  
+  lifecycle {
+    ignore_changes = [ami]
+  }
 }
-
-
-
