@@ -1,6 +1,5 @@
 provider "aws" {
   version = "~> 2.0"
-  profile = "upway"
   region = "us-west-2"
 }
 
